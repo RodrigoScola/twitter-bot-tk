@@ -1,21 +1,21 @@
-import { Avatar, Box, Heading, Text, useTimeout } from "@chakra-ui/react"
+import { Avatar, Box, Flex, Heading, Text, useTimeout } from "@chakra-ui/react"
 import { useEffect, useRef, useState } from "react"
 
 import { FormInput } from "./Input"
 
-export const SearchComponent = ({ addAccount }) => {
-	const [searchTerm, setSearchTerm] = useState("snuffy")
+export const SearchComponent = ({ handleChange, selectResult, currentTerm = "" }) => {
 	const [state, setState] = useState({
-		data: null,
+		data: [],
 	})
 
 	useEffect(() => {
 		const delaydebounce = setTimeout(() => {
 			const go = async () => {
-				if (searchTerm) {
+				if (currentTerm) {
 					try {
-						const data = await fetch("/api/twitter/" + searchTerm)
+						const data = await fetch("/api/twitter/user/" + currentTerm)
 						const jsondata = await data.json()
+						console.log(jsondata)
 						setState({
 							data: jsondata,
 						})
@@ -28,38 +28,48 @@ export const SearchComponent = ({ addAccount }) => {
 			}
 			go()
 		}, 1400)
+
 		return () => clearTimeout(delaydebounce)
-	}, [searchTerm])
-	const selectSearchResult = (e) => {
-		console.log(e)
-		if (addAccount) {
-			addAccount(state.data)
-		}
+	}, [currentTerm])
+
+	useEffect(() => {
+		console.log("result")
+		console.log(state)
+		// if (state.data[0] !== null) {
+		// 	selectResult(state?.data[0])
+		// }
+	}, [state])
+
+	const selectSearchResult = (data) => {
+		selectResult(data)
 	}
+	console.log(state.data)
 	return (
 		<div>
-			<FormInput
-				value={searchTerm}
-				name={"searchTerm"}
-				handleChange={(e) => {
-					console.log(e.target.value)
-					setSearchTerm(e.target.value)
-				}}
-			/>
+			<FormInput value={currentTerm} name={"content"} handleChange={handleChange} />
 			<Box>
-				<ul>
-					{state?.data !== null ? (
-						<li onClick={() => selectSearchResult(state.data)} key={"asdf"}>
-							<Box>
-								<Avatar src={state?.data?.profile_image_url} />
-								<Heading>{state?.data?.name}</Heading>
-								<Text>followers: {state?.data?.public_metrics?.followers_count}</Text>
-							</Box>
-						</li>
-					) : (
-						<Text>No User found</Text>
-					)}
-				</ul>
+				{/* descritpion
+					id
+					name
+					profile_image_url
+					pulblic_metrics 
+						followers_count
+						following_count
+					username
+					verified
+				
+				 */}
+				{state?.data?.map((v, i) => {
+					return (
+						<Flex key={"search_result_" + i} alignItems={"center"}>
+							<Avatar m={3} name={v.name} src={v?.profile_image_url} />
+							<Flex dir="column">
+								<Text pr={3}>{v?.username}</Text>
+								<Text>followers: {v.public_metrics.followers_count}</Text>
+							</Flex>
+						</Flex>
+					)
+				})}
 			</Box>
 		</div>
 	)

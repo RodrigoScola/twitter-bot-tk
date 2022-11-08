@@ -3,7 +3,8 @@ const database = new PocketBase("http://127.0.0.1:8090")
 class Database {
 	async getPosts() {
 		try {
-			const results = await database.records.getList("posts")
+			let results = await database.records.getList("posts")
+			results.items = results.items.filter((item) => item.type !== "settings")
 			return results
 		} catch (err) {
 			return null
@@ -58,13 +59,21 @@ class Database {
 	 * @memberof Database
 	 */
 	async createPost(item) {
+		if (!item.type) {
+			return false;
+		}
+		if (item.content && item.type == 'hashtag') {
+			item.content = '#' + item.content
+		}
+
+
 		try {
 			const result = await database.records.create("posts", {
 				...item,
 			})
 			return result.id
 		} catch (err) {
-			console.log(err)
+			// console.log(err)
 			return null
 		}
 	}

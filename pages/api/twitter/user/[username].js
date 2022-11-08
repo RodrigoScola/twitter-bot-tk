@@ -1,9 +1,8 @@
-import { TClient } from "../../../db/TwitterApi"
+import { tclient } from "../../../../db/TwitterApi"
 
 export default async function handler(req, res) {
-	const tclient = new TClient()
-	await tclient.init()
 	const { username } = req.query
+	await tclient.init()
 	if (username == null) {
 		res.json({
 			err: "not found",
@@ -15,10 +14,8 @@ export default async function handler(req, res) {
 			"user.fields": ["withheld", "public_metrics", "profile_image_url", "verified", "description", "url"],
 		})
 
-		res.json(user)
+		res.json([user])
 	} catch (err) {
-		res.json({
-			err: "user not found",
-		})
+		res.json([{}])
 	}
 }

@@ -4,62 +4,63 @@ import { db } from "../db/database"
 import { groupByKey } from "../utils"
 import { useState } from "react"
 import { useForm } from "../hooks/useForm"
-import { useFetch } from "../hooks/useFetch"
 import { SearchComponent } from "../components/forms/Search"
 
 export default function Home({ value }) {
 	value = JSON.parse(value)
 	const [items, setItems] = useState(value)
 	const [{ type, content }, setValue] = useForm({
-		type: "",
+		type: "reply",
 		content: "",
 	})
+	const [meta, setMeta] = useState({})
+
 	const handleSubmit = async (e) => {
 		e.preventDefault()
-
-		db.createPost({
+		console.log(meta)
+		await db.createPost({
 			type,
 			content,
+			meta,
 		})
+		window.location.href = "/"
 	}
-	const addAccount = async (data) => {
-		console.log(data)
-		await db.createPost({
-			type: "account",
-			content: data?.username,
-			meta: data,
-		})
-	}
+
 	return (
 		<div>
-			twitter create
 			<form onSubmit={handleSubmit}>
 				<Flex minWidth={"max-content"}>
 					<Box minW={"max-content"} pr={2}>
 						<Select
-							defaultValue={"tweet"}
+							defaultValue={type}
 							name="type"
 							onChange={setValue}
 							w={"fit-content"}
 							placeholder="select a type"
 						>
 							{["tweet", "reply", "account", "hashtag"].map((v, i) => {
-								return <option value={v}>{v}</option>
+								return (
+									<option key={"option" + i} value={v}>
+										{v}
+									</option>
+								)
 							})}
 						</Select>
 					</Box>
 					{type == "account" ? (
-						<SearchComponent addAccount={addAccount} />
+						<SearchComponent currentTerm={content} selectResult={setMeta} handleChange={setValue} />
 					) : (
 						<FormInput name="content" handleChange={setValue} />
 					)}
-					<Button>Add Response</Button>
+					<Button minW={"max-content"} type="submit">
+						Add {type}
+					</Button>
 				</Flex>
 			</form>
 			<ul>
 				{Object.keys(items).map((key, i) => {
 					return (
-						<li key={key + i}>
+						<li key={Date.now()}>
 							<h3>{key}</h3>
 							<ul>
 								{items[key].map((item, ind) => {

@@ -31,6 +31,9 @@ export class TClient {
 		this.client = refreshClient
 		return this.client
 	}
+	async reply(text, replyUserId) {
+		
+	}
 	async tweet(content) {
 		if (this.client == null) {
 			await this.#_setClient()
@@ -46,7 +49,7 @@ export class TClient {
 				})
 			} else {
 				await db.createPost({
-					type: "replies",
+					type: "tweet",
 					content,
 					tweet_id: data.id,
 				})
@@ -58,3 +61,4 @@ export class TClient {
 		}
 	}
 }
+export const tclient = new TClient()

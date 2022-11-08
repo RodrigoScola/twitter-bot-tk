@@ -7,13 +7,13 @@ export default async function handler(req, res) {
 	const { url, codeVerifier, state } = Client.generateOAuth2AuthLink(twitterCallbackUrl, {
 		scope: ["tweet.read", "tweet.write", "users.read", "offline.access"],
 	})
-
 	const d = await db.updatePost(twitterOauthKeyID, {
 		meta: {
 			codeVerifier: codeVerifier,
 			state: state,
 		},
 	})
-	// res.send(d)
+	// res.send("asdf")
+
 	res.redirect(url)
 }
