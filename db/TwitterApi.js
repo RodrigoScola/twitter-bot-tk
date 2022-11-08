@@ -32,7 +32,7 @@ export class TClient {
 		return this.client
 	}
 	async reply(text, replyUserId) {
-		
+
 	}
 	async tweet(content) {
 		if (this.client == null) {
@@ -61,4 +61,22 @@ export class TClient {
 		}
 	}
 }
+class TUser {
+	username = '';
+	userId = '';
+
+	init() {
+
+	}
+	constructor(usernameorId) {
+		 db.getPostBy('content', usernameorId);
+
+	}
+	
+
+	
+}
+
+
+
 export const tclient = new TClient()

@@ -1,9 +1,15 @@
 import PocketBase from "pocketbase"
 const database = new PocketBase("http://127.0.0.1:8090")
 class Database {
-	async getPosts() {
+	async getPosts(items = { postType: "any" }) {
+		let query = null
+		if (items.postType !== "any") {
+			query = {
+				filter: `type = "${items.postType}"`,
+			}
+		}
 		try {
-			let results = await database.records.getList("posts")
+			let results = await database.records.getList("posts", 1, 50, query)
 			results.items = results.items.filter((item) => item.type !== "settings")
 			return results
 		} catch (err) {
@@ -60,12 +66,11 @@ class Database {
 	 */
 	async createPost(item) {
 		if (!item.type) {
-			return false;
+			return false
 		}
-		if (item.content && item.type == 'hashtag') {
-			item.content = '#' + item.content
+		if (item.content && item.type == "hashtag") {
+			item.content = "#" + item.content
 		}
-
 
 		try {
 			const result = await database.records.create("posts", {
