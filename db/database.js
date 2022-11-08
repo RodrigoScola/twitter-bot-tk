@@ -1,5 +1,6 @@
 import PocketBase from "pocketbase"
-const database = new PocketBase("http://127.0.0.1:8090")
+import { deepSearch } from "../utils"
+const database = new PocketBase("https://twitter-bot-tk.herokuapp.com")
 class Database {
 	async getPosts(items = { postType: "any" }) {
 		let query = null

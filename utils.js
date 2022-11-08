@@ -9,8 +9,13 @@ export const groupByKey = (obj = [], key = "replies") => {
 	}, {})
 }
 
-export function deepSearch(object, key, predicate) {
-	if (object.hasOwnProperty(key) && predicate(key, object[key]) === true) return object
+export function deepSearch(object, key, predicate = null) {
+	if (object.hasOwnProperty(key)) {
+		if (predicate !== null && predicate(key, object) == true) {
+			return object
+		}
+		return object
+	}
 
 	for (let i = 0; i < Object.keys(object).length; i++) {
 		let value = object[Object.keys(object)[i]]
@@ -21,3 +26,39 @@ export function deepSearch(object, key, predicate) {
 	}
 	return null
 }
+
+// const data = {
+// 	one: "two",
+// 	tw: {
+// 		thre: "dos",
+// 		four: ["as"],
+// 	},
+// 	thre: {
+// 		tacors: {
+// 			locos: "pizza",
+// 		},
+// 		gaming: {
+// 			trye: "yes",
+// 		},
+// 	},
+// }
+
+// // class Post {
+// // 	data
+// // 	constructor(data) {
+// // 		this.data = data
+// // 	}
+// // 	get_attr(name) {
+// // 		return deepSearch(this, name)[name]
+// // 	}
+// // 	set_attr(key, value, options = { isRestrictive: false }) {
+// // 		if (options.isRestrictive == true) {
+// // 			return (deepSearch(this, key)[key] = value)
+// // 		}
+// // 		let obj = deepSearch(this, key)[key]
+// // 		return (deepSearch(this, key)[key] = {
+// // 			...obj,
+// // 			...value,
+// // 		})
+// // 	}
+// // }
