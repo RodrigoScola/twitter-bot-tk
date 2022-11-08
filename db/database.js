@@ -1,0 +1,82 @@
+import PocketBase from "pocketbase"
+const database = new PocketBase("http://127.0.0.1:8090")
+class Database {
+	async getPosts() {
+		try {
+			const results = await database.records.getList("posts")
+			return results
+		} catch (err) {
+			return null
+		}
+	}
+
+	async getPost(postId) {
+		try {
+			const results = await database.records.getOne("posts", postId)
+
+			return results
+		} catch (err) {
+			console.log(err)
+			return null
+		}
+	}
+	async getPostBy(key = "content", value) {
+		try {
+			const post = await database.records.getList("posts", 1, 50, {
+				filter: `${key} = "${value}"`,
+			})
+			return post.items[0] ? post.items[0] : []
+		} catch (err) {
+			return {}
+		}
+	}
+	async updatePost(postId, newData) {
+		try {
+			const hasPost = await this.getPost(postId)
+			if (hasPost) {
+				const data = {
+					...hasPost,
+					...newData,
+				}
+				const result = await database.records.update("posts", postId, data)
+
+				return result
+			} else {
+				const res = await this.createPost("posts", newData)
+				return res
+			}
+		} catch (err) {
+			console.log(err)
+			return false
+		}
+	}
+	/**
+	 *
+	 *
+	 * @param {*} { type = "", content = "", meta = {} }
+	 * @return {*}
+	 * @memberof Database
+	 */
+	async createPost(item) {
+		try {
+			const result = await database.records.create("posts", {
+				...item,
+			})
+			return result.id
+		} catch (err) {
+			console.log(err)
+			return null
+		}
+	}
+	async deletePost(postId) {
+		const hasPost = await this.getPost(postId)
+
+		if (!hasPost) {
+			const res = await database.records.delete("posts", postId)
+			return true
+		}
+		return false
+	}
+}
+
+export const db = new Database()
