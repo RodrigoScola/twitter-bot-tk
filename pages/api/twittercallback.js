@@ -30,5 +30,6 @@ export default async function handler(req, res) {
 		},
 	})
 
-	res.send("cool")
+	res.redirect("/")
+
 }
