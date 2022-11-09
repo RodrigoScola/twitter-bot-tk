@@ -1,96 +1,73 @@
-import PocketBase from "pocketbase"
 import { deepSearch } from "../utils"
-const database = new PocketBase("https://twitter-bot-tk.herokuapp.com")
+import { createClient } from "@supabase/supabase-js"
+
+const supabaseUrl = "https://yxkqivhetpijdrfahibb.supabase.co"
+const supaKey =
+	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4a3FpdmhldHBpamRyZmFoaWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE2Njc5NDc2NDcsImV4cCI6MTk4MzUyMzY0N30.llKUEOqMqUFsFRFZ8y4f_3nZ2p8rLdpmibDeVxuhxic"
+export const database = createClient(supabaseUrl, supaKey)
 class Database {
-	async getPosts(items = { postType: "any" }) {
-		let query = null
-		if (items.postType !== "any") {
-			query = {
-				filter: `type = "${items.postType}"`,
-			}
-		}
-		try {
-			let results = await database.records.getList("posts", 1, 50, query)
-			results.items = results.items.filter((item) => item.type !== "settings")
-			return results
-		} catch (err) {
-			return null
-		}
+	async getPosts() {
+		let query = database.from("posts").select("*").neq("type", "settings")
+
+		const { data } = await query
+		return data
 	}
 
 	async getPost(postId) {
 		try {
-			const results = await database.records.getOne("posts", postId)
+			const { data } = await database.from("posts").select("*").eq("id", postId)
 
-			return results
+			return data[0]
 		} catch (err) {
-			console.log(err)
-			return null
+			return {}
 		}
 	}
 	async getPostBy(key = "content", value) {
 		try {
-			const post = await database.records.getList("posts", 1, 50, {
-				filter: `${key} = "${value}"`,
-			})
-			return post.items[0] ? post.items[0] : []
+			const { data } = await database.from("posts").select("*").eq("content", value)
+
+			return data[0] !== undefined ? data[0] : {}
 		} catch (err) {
 			return {}
 		}
 	}
 	async updatePost(postId, newData) {
 		try {
-			const hasPost = await this.getPost(postId)
-			if (hasPost) {
-				const data = {
-					...hasPost,
-					...newData,
-				}
-				const result = await database.records.update("posts", postId, data)
-
-				return result
-			} else {
-				const res = await this.createPost("posts", newData)
-				return res
-			}
+			const { data, err } = await database.from("posts").update(newData).eq("id", postId).select()
+			return { data }
 		} catch (err) {
-			console.log(err)
-			return false
+			return {}
 		}
 	}
-	/**
-	 *
-	 *
-	 * @param {*} { type = "", content = "", meta = {} }
-	 * @return {*}
-	 * @memberof Database
-	 */
-	async createPost(item) {
-		if (!item.type) {
-			return false
-		}
-		if (item.content && item.type == "hashtag") {
-			item.content = "#" + item.content
-		}
+	async updateOrCreate(postid, newData) {
+		const hasPost = await this.getPost(postid)
 
-		try {
-			const result = await database.records.create("posts", {
-				...item,
+		if (hasPost.id) {
+			const post = await db.updatePost(hasPost.id, {
+				...newData,
 			})
-			return result.id
-		} catch (err) {
-			// console.log(err)
-			return null
+			return post
+		} else {
+			const post = await db.createPost(newData)
+			return post
 		}
 	}
-	async deletePost(postId) {
-		const hasPost = await this.getPost(postId)
 
-		if (!hasPost) {
-			const res = await database.records.delete("posts", postId)
-			return true
+	async createPost(item) {
+		try {
+			const { data } = await database
+				.from("posts")
+				.insert({ ...item })
+				.select()
+			return data
+		} catch (err) {
+			return {}
 		}
-		return false
+	}
+
+	async deletePost(postId) {
+		const { data } = await database.from("posts").delete().eq("id", postId).select()
+		return data
 	}
 }
 

@@ -35,9 +35,9 @@ export const SearchComponent = ({ handleChange, selectResult, currentTerm = "" }
 	useEffect(() => {
 		console.log("result")
 		console.log(state)
-		// if (state.data[0] !== null) {
-		// 	selectResult(state?.data[0])
-		// }
+		if (state.data[0] !== null) {
+			selectResult(state?.data[0])
+		}
 	}, [state])
 
 	const selectSearchResult = (data) => {

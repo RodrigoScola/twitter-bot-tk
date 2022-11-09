@@ -1,4 +1,5 @@
 export const groupByKey = (obj = [], key = "replies") => {
+
 	return obj.reduce((curr, next) => {
 		if (!curr[next[key]]) {
 			curr[next[key]] = [next]
@@ -8,7 +9,20 @@ export const groupByKey = (obj = [], key = "replies") => {
 		return curr
 	}, {})
 }
-
+export const setDefaultparams = (obj, defaults = {}, props = { isStrict: false }) => {
+	if (props.isStrict == true) {
+		return {
+			...defaults,
+			...obj,
+		}
+	}
+	Object.keys(defaults).map((v, i) => {
+		if (obj.hasOwnProperty(v)) {
+			defaults[v] = obj[v]
+		}
+	})
+	return defaults
+}
 export function deepSearch(object, key, predicate = null) {
 	if (object.hasOwnProperty(key)) {
 		if (predicate !== null && predicate(key, object) == true) {
@@ -27,21 +41,21 @@ export function deepSearch(object, key, predicate = null) {
 	return null
 }
 
-// const data = {
-// 	one: "two",
-// 	tw: {
-// 		thre: "dos",
-// 		four: ["as"],
-// 	},
-// 	thre: {
-// 		tacors: {
-// 			locos: "pizza",
-// 		},
-// 		gaming: {
-// 			trye: "yes",
-// 		},
-// 	},
-// }
+const data = {
+	one: "two",
+	tw: {
+		thre: "dos",
+		four: ["as"],
+	},
+	thre: {
+		tacors: {
+			locos: "pizza",
+		},
+		gaming: {
+			trye: "yes",
+		},
+	},
+}
 
 // // class Post {
 // // 	data

@@ -9,12 +9,14 @@ export default async function handler(req, res) {
 		})
 	}
 	try {
-		tclient.client.v2.user
-		const { data: user } = await tclient.client.v2.userByUsername(username, {
-			"user.fields": ["withheld", "public_metrics", "profile_image_url", "verified", "description", "url"],
-		})
-
-		res.json([user])
+		const user = await tclient.getUser(username)
+		const tweets = await tclient.getLastTweetFromUser(user.id)
+		res.json([
+			{
+				...user,
+				lastTweet: tweets,
+			},
+		])
 	} catch (err) {
 		res.json([{}])
 	}
