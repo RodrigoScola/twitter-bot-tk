@@ -48,6 +48,10 @@ export class TClient {
 					tweet_id: data.id,
 				},
 			})
+			return {
+				text: data.text,
+				id: data.id,
+			}
 		} catch (err) {
 			return {
 				data: {},
