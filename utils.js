@@ -1,5 +1,5 @@
+import _ from "lodash"
 export const groupByKey = (obj = [], key = "replies") => {
-
 	return obj.reduce((curr, next) => {
 		if (!curr[next[key]]) {
 			curr[next[key]] = [next]
@@ -9,7 +9,8 @@ export const groupByKey = (obj = [], key = "replies") => {
 		return curr
 	}, {})
 }
-export const setDefaultparams = (obj, defaults = {}, props = { isStrict: false }) => {
+export const setDefaultparams = (obj, defaults = {}, props = { isStrict: false, remoeNull: false }) => {
+	obj = _.omitBy(obj, _.isNil)
 	if (props.isStrict == true) {
 		return {
 			...defaults,
@@ -21,7 +22,7 @@ export const setDefaultparams = (obj, defaults = {}, props = { isStrict: false }
 			defaults[v] = obj[v]
 		}
 	})
-	return defaults
+	return _.omitBy(defaults, _.isNil)
 }
 export function deepSearch(object, key, predicate = null) {
 	if (object.hasOwnProperty(key)) {
@@ -39,22 +40,6 @@ export function deepSearch(object, key, predicate = null) {
 		}
 	}
 	return null
-}
-
-const data = {
-	one: "two",
-	tw: {
-		thre: "dos",
-		four: ["as"],
-	},
-	thre: {
-		tacors: {
-			locos: "pizza",
-		},
-		gaming: {
-			trye: "yes",
-		},
-	},
 }
 
 // // class Post {

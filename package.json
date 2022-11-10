@@ -17,10 +17,12 @@
 		"@supabase/supabase-js": "^2.0.5",
 		"dotenv": "^16.0.3",
 		"framer-motion": "^7.6.5",
+		"lodash": "^4.17.21",
 		"next": "13.0.2",
 		"pocketbase": "^0.7.4",
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
+		"twit": "^2.2.11",
 		"twitter-api-v2": "^1.12.9"
 	},
 	"devDependencies": {

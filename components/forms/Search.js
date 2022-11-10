@@ -65,7 +65,7 @@ export const SearchComponent = ({ handleChange, selectResult, currentTerm = "" }
 							<Avatar m={3} name={v.name} src={v?.profile_image_url} />
 							<Flex dir="column">
 								<Text pr={3}>{v?.username}</Text>
-								<Text>followers: {v.public_metrics.followers_count}</Text>
+								<Text>followers: {v?.public_metrics?.followers_count}</Text>
 							</Flex>
 						</Flex>
 					)

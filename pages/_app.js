@@ -1,10 +1,12 @@
-import { ChakraProvider, ColorModeProvider, ColorModeScript } from "@chakra-ui/react"
+import { Box, ChakraProvider, ColorModeProvider, ColorModeScript } from "@chakra-ui/react"
 import "../styles/globals.css"
 
 function MyApp({ Component, pageProps }) {
 	return (
 		<ChakraProvider resetCSS={false}>
-			<Component {...pageProps} />
+			<Box w={"1000px"} m={"auto"} pt={6}>
+				<Component {...pageProps} />
+			</Box>
 		</ChakraProvider>
 	)
 }

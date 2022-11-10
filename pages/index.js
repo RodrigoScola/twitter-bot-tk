@@ -1,5 +1,5 @@
 import { FormInput } from "../components/forms/Input"
-import { Avatar, Box, Button, Text, Center, Flex, Select } from "@chakra-ui/react"
+import { Avatar, Box, Button, Text, Center, Flex, Select, Accordion, ListItem, UnorderedList } from "@chakra-ui/react"
 import { db } from "../db/database"
 import { Alert } from "../components/forms/Alert"
 import { groupByKey } from "../utils"
@@ -8,7 +8,9 @@ import { useForm } from "../hooks/useForm"
 import { DeleteIcon } from "@chakra-ui/icons"
 import { SearchComponent } from "../components/forms/Search"
 import { tfront } from "../db/TwitterApiFrontend"
-
+import { AccountComponent } from "../components/forms/Account"
+import lodash from "lodash"
+import { updateAccountsInformation, updateaccountInformation } from "../db/twitterUtils"
 export default function Home({ value }) {
 	const [items, setItems] = useState(value)
 	const [{ type, content, tweetcontent }, setValue] = useForm({
@@ -70,57 +72,19 @@ export default function Home({ value }) {
 				{Object.keys(items).map((key, i) => {
 					return (
 						<li key={key + i}>
-							<h3>{key}</h3>
-							<ul>
+							<h3>{lodash.capitalize(key)}</h3>
+
+							<UnorderedList>
 								{items[key].map((item, ind) => {
 									if (key == "account") {
 										return (
-											<li key={ind}>
-												<Flex justifyContent={"space-between"}>
-													<Flex>
-														<Avatar src={item?.meta?.profile_image_url} />
-														<Text pl={2}>{item.content}</Text>
-													</Flex>
-													<Flex>
-														<Alert
-															submitFunction={async () => {
-																await db.deletePost(item.id)
-																window.location.href = "/"
-															}}
-															Openelement={
-																<Button colorScheme={"red"}>
-																	Delete
-																</Button>
-															}
-															title="are you sure you want to delete this account?"
-															content="This action is irreversible and cannot be changed"
-														/>
-														<Alert
-															submitFunction={() => {
-																tfront.tweet(tweetcontent)
-															}}
-															Openelement={
-																<Button colorScheme={"twitter"}>
-																	Tweet
-																</Button>
-															}
-															title={`Tweet at ` + item.content}
-															content={
-																<>
-																	<form>
-																		<FormInput
-																			defaultValue={`@${item.content} `}
-																			name="tweetcontent"
-																			isTextArea={"true"}
-																			handleChange={setValue}
-																		/>
-																	</form>
-																</>
-															}
-														/>
-													</Flex>
-												</Flex>
-											</li>
+											<ListItem pt={6} key={ind}>
+												<AccountComponent
+													item={item}
+													tweetcontent={tweetcontent}
+													setValue={setValue}
+												/>
+											</ListItem>
 										)
 									}
 									return (
@@ -129,7 +93,7 @@ export default function Home({ value }) {
 										</li>
 									)
 								})}
-							</ul>
+							</UnorderedList>
 						</li>
 					)
 				})}
@@ -139,7 +103,10 @@ export default function Home({ value }) {
 }
 export async function getServerSideProps() {
 	const data = await db.getPosts()
+
 	const grouped = groupByKey(data, "type")
+	// const u = await updateAccountsInformation(grouped?.account)
+
 	return {
 		props: {
 			value: grouped,

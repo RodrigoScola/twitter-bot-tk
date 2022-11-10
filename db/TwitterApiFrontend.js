@@ -1,6 +1,8 @@
-export const fetchData = async (url, props) => {
+import { site_url } from "../variables"
+
+export const fetchData = async (url, props = { method: "GET" }) => {
 	const data = await fetch(url, {
-		method: props.method ? props.method : "GET",
+		method: props.method,
 		headers: {
 			Accept: "application/json",
 			"Content-Type": "application/json",
@@ -12,8 +14,20 @@ export const fetchData = async (url, props) => {
 }
 
 class TwitterApiFrontend {
-	#baseUrl = "/api/twitter/"
-
+	#baseUrl = site_url + "/api/twitter/"
+	async reply(text, userId) {
+		await fetchData(this.#baseUrl + "reply", {
+			method: "POST",
+			body: {
+				text,
+				userId,
+			},
+		})
+	}
+	async getUserInfo(userId) {
+		const data = await fetchData(this.#baseUrl + "user/" + userId)
+		return data[0]
+	}
 	async tweet(text) {
 		const data = await fetchData(this.#baseUrl + "tweet", {
 			method: "POST",
@@ -22,7 +36,7 @@ class TwitterApiFrontend {
 			},
 		})
 
-		return data
+		return data[0]
 	}
 }
 export const tfront = new TwitterApiFrontend()
