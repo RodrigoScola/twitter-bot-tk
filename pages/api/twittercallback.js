@@ -1,4 +1,3 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { db } from "../../db/database"
 import { Client, twitterCallbackUrl, twitterOauthKeyID } from "../../db/TwitterApi"
 
@@ -31,5 +30,4 @@ export default async function handler(req, res) {
 	})
 
 	res.redirect("/")
-
 }

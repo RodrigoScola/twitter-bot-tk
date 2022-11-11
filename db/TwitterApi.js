@@ -1,9 +1,10 @@
 import { TwitterApi } from "twitter-api-v2"
+import _ from "lodash"
 import { deepSearch } from "../utils"
 import { db } from "./database"
 export const Client = new TwitterApi({
 	clientId: "ZXdCU1JBN1FDNXc2NURnUm1aNTU6MTpjaQ",
-	clientSecret: "3XlnozYYuYa9_lPk5570Gh8ofiRfM0EW2AgEMcGeWHF2rO2e9p",
+	clientSecret: "6y2G_vk1aRTMl_dbv9yJ_LqiJLcnfIieYKY2UP44GUp_k7nzh3",
 })
 
 export const twitterCallbackUrl = "http://127.0.0.1:3000/api/twittercallback"
@@ -18,6 +19,7 @@ export class TClient {
 	}
 
 	async #_setClient() {
+		if (this.currentID !== 0) return this.client
 		const post = await db.getPost(1)
 		// console.log(post)
 		const { refreshToken } = post.meta
@@ -35,24 +37,16 @@ export class TClient {
 			},
 		})
 		this.client = refreshClient
+		this.currentID++
 		return this.client
 	}
 
-	async stream() {
-		const { data } = await this.client.v2.updateStreamRules({
-			add: [
-				{
-					value: "from:rodrio00343267 -is:retweet -is:reply ",
-				},
-			],
-		})
-		const samplestream = await this.client.v2.sampleStream()
-		return data
-	}
-	async reply(text, idToReply) {
+	async reply(text, idToReply, userId) {
 		try {
 			const { data } = await this.client.v2.reply(text, idToReply)
+
 			console.log(idToReply)
+			console.log("this is the user id ", userId)
 			const post = await db.getPostBy("title", idToReply)
 			console.log(post)
 			await db.updateOrCreate(post.id, {
@@ -64,9 +58,9 @@ export class TClient {
 					tweet_id: data.id,
 				},
 			})
-			const account = await db.getAccountBy("last_tweet", idToReply)
-			await db.updateAccount(account.id, {
-				last_replied: true,
+
+			await db.updateAccount(userId, {
+				last_replied: data.id,
 			})
 
 			return {
@@ -82,27 +76,27 @@ export class TClient {
 	}
 	async getuserTimeline(userId) {
 		try {
-			const { data: timeline } = await this.client.v2.userTimeline(userId, {
+			const { data: timeline, tweets } = await this.client.v2.userTimeline(userId, {
 				exclude: ["replies", "retweets"],
+				max_results: 5,
 			})
-
-			return timeline
+			return tweets
 		} catch (err) {
 			return {}
 		}
 	}
-	async getLastTweetFromUser(userId = "1622607991") {
+	async getLastTweetFromUser(userId) {
 		try {
-			const { data } = await this.getuserTimeline(userId)
+			const data = await this.getuserTimeline(userId)
 			return data[0]
 		} catch (err) {
-			return {}
+			return { err }
 		}
 	}
 
 	async getUser(userId) {
 		try {
-			if (!Number(userId)) {
+			if (_.isString(userId)) {
 				const { data: user } = await this.client.v2.userByUsername(userId, {
 					"user.fields": [
 						"withheld",
@@ -113,14 +107,12 @@ export class TClient {
 						"url",
 					],
 				})
-				return {
-					id: user.id,
-					...user,
-				}
+				return user
 			} else {
-				const { data: user } = await this.client.v2.user(Number(userId), {
+				const { data: user } = await this.client.v2.user(userId, {
 					"user.fields": [
 						"withheld",
+
 						"public_metrics",
 						"profile_image_url",
 						"verified",
@@ -128,10 +120,7 @@ export class TClient {
 						"url",
 					],
 				})
-				return {
-					id: user.id,
-					...user,
-				}
+				return user
 			}
 		} catch (err) {
 			console.log(err)
@@ -160,4 +149,3 @@ export class TClient {
 	}
 }
 export const tclient = new TClient()
-

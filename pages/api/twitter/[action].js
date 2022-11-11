@@ -29,8 +29,8 @@ async function replyhandler(req, res) {
 
 	if (req.method == "POST") {
 		try {
-			const { userId, text } = req.body
-			const data = await tclient.reply(text, userId)
+			const { userId, text, tweetId } = req.body
+			const data = await tclient.reply(text, tweetId, userId)
 			return res.send(data)
 		} catch (err) {
 			res.status(400).json({
@@ -46,7 +46,7 @@ async function tweethandler(req, res) {
 	await tclient.init()
 	if (req.method == "POST") {
 		const { text } = req.body
-		const data = await tclient.tweet("@somethings what youw ant")
+		const data = await tclient.tweet(text)
 		res.json(data)
 	} else {
 		res.json({

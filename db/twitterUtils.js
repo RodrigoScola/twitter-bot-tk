@@ -1,18 +1,25 @@
 import _ from "lodash"
+import { Account } from "./Account"
 import { db } from "./database"
 import { tfront } from "./TwitterApiFrontend"
 export const updateaccountInformation = async (account) => {
-	try {
-		const user = await tfront.getUserInfo(account.id)
-		const currUser = await db.updateAccount(user.id, {
-			last_tweet: user.lastTweet,
-		})
-
-		return currUser
-	} catch (err) {}
+	const updatedInformation = await tfront.getUserInfo(account.id)
+	const updatedb = await db.updateAccount(account.id, {
+		last_tweet: updatedInformation?.lastTweet?.id,
+	})
+	return updatedb
 }
 export const updateAccountsInformation = async (accounts = []) => {
-	accounts.forEach(async (account) => {
-		const currentAccount = await updateaccountInformation(account)
+	const promises = accounts.map(async (account) => {
+		const nac = await updateaccountInformation(account)
+		return new Account(nac?.id, nac)
 	})
+	const nwaccounts = await Promise.all(promises)
+	return nwaccounts
+}
+export const getUsersIds = async () => {
+	const ids = await db.getAccounts({
+		returns: "id",
+	})
+	return ids
 }

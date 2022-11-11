@@ -49,7 +49,7 @@ export const AccountComponent = ({ item, setValue, tweetcontent }) => {
 			<ButtonGroup>
 				<Alert
 					submitFunction={async () => {
-						await tfront.reply(tweetcontent, item?.meta?.lastTweet?.id)
+						await tfront.reply(tweetcontent, item?.meta?.lastTweet?.id, item.id)
 					}}
 					Openelement={<Button colorScheme={"whatsapp"}>Reply</Button>}
 					title={`Reply to ` + item?.content}

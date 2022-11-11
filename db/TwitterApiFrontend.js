@@ -1,32 +1,46 @@
 import { site_url } from "../variables"
 
 export const fetchData = async (url, props = { method: "GET" }) => {
-	const data = await fetch(url, {
-		method: props.method,
-		headers: {
-			Accept: "application/json",
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(props.body),
-	})
-	const jsondata = data.json()
-	return jsondata
+	try {
+		const params = {
+			method: props.method,
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+			},
+		}
+		if (props.body !== undefined && params.method !== "GET") {
+			params.body = JSON.stringify(props.body)
+		}
+		const data = await fetch(url, params)
+		const jsondata = data.json()
+		return jsondata
+	} catch (err) {
+		return {}
+	}
 }
 
 class TwitterApiFrontend {
 	#baseUrl = site_url + "/api/twitter/"
-	async reply(text, userId) {
+	async reply(text, tweetId, userId) {
 		await fetchData(this.#baseUrl + "reply", {
 			method: "POST",
 			body: {
 				text,
+				tweetId,
 				userId,
 			},
 		})
 	}
 	async getUserInfo(userId) {
-		const data = await fetchData(this.#baseUrl + "user/" + userId)
-		return data[0]
+		try {
+			const data = await fetchData("api/twitter/user/" + userId, {
+				method: "GET",
+			})
+			return data
+		} catch (err) {
+			return [{}]
+		}
 	}
 	async tweet(text) {
 		const data = await fetchData(this.#baseUrl + "tweet", {

@@ -1,4 +1,4 @@
-import { deepSearch, setDefaultparams } from "../utils"
+import { deepSearch, formatItems, setDefaultparams } from "../utils"
 import { createClient } from "@supabase/supabase-js"
 import _ from "lodash"
 const supabaseUrl = "https://yxkqivhetpijdrfahibb.supabase.co"
@@ -7,11 +7,11 @@ const supaKey =
 export const database = createClient(supabaseUrl, supaKey)
 class Database {
 	#tablename = "posts"
-	async getPosts() {
-		let query = database.from(this.#tablename).select("*").neq("type", "settings")
-
+	async getPosts(options = {}) {
+		let query = database.from(this.#tablename).select("*").neq("type", "settings").neq("type", "reply")
 		const { data } = await query
-		return data
+
+		return formatItems(data, options)
 	}
 	async getRandomPost(postType = "reply") {
 		let { data: allPosts } = await database
@@ -35,7 +35,6 @@ class Database {
 	async getPostBy(key = "content", value) {
 		try {
 			const { data } = await database.from(this.#tablename).select("*").eq(key, value)
-			console.log(data)
 			return data[0] !== undefined ? data[0] : {}
 		} catch (err) {
 			return {}
@@ -73,7 +72,7 @@ class Database {
 			if (item.type == "account") {
 				const { data: account } = await database
 					.from("accounts")
-					.insert({ id: item.id, name: item.content })
+					.insert({ id: item.id, name: item.content, last_tweet: item.meta.lastTweet.id })
 			}
 			return data
 		} catch (err) {
@@ -99,16 +98,23 @@ class Database {
 	async getAccount(accountId) {
 		try {
 			const { data } = await database.from("accounts").select("*").eq("id", accountId)
-
-			return data
+			return data[0]
 		} catch (err) {
 			return err
 		}
 	}
-	async updateAccount(accountId, item) {
-		// const { data: user } = await database.from("accounts").update(item).eq("id", accountId).select()
-		return true
-		// return user[0]
+	async getAccounts(options = {}) {
+		try {
+			const { data } = await database.from("accounts").select("*")
+			return formatItems(data, options)
+		} catch (err) {
+			return err
+		}
+	}
+	async updateAccount(accountId = "", item) {
+		const { data: user } = await database.from("accounts").update(item).eq("id", accountId).select()
+		const post = await this.getAccount(accountId)
+		return post
 	}
 	async deletePost(postId) {
 		const { data } = await database.from(this.#tablename).delete().eq("id", postId).select()

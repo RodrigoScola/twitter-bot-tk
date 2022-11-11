@@ -14,7 +14,7 @@ import { updateAccountsInformation, updateaccountInformation } from "../db/twitt
 export default function Home({ value }) {
 	const [items, setItems] = useState(value)
 	const [{ type, content, tweetcontent }, setValue] = useForm({
-		type: "reply",
+		type: "tweet",
 		content: "",
 		tweetcontent: "",
 	})
