@@ -43,34 +43,23 @@ export class TClient {
 
 	async reply(text, idToReply, userId) {
 		try {
-			const { data } = await this.client.v2.reply(text, idToReply)
-
-			console.log(idToReply)
-			console.log("this is the user id ", userId)
-			const post = await db.getPostBy("title", idToReply)
-			console.log(post)
-			await db.updateOrCreate(post.id, {
-				content: text,
-				type: "reply",
-				title: idToReply,
-				meta: {
-					replyId: idToReply,
-					tweet_id: data.id,
-				},
-			})
-
+			const { data , errors} = await this.client.v2.reply(text, idToReply)
+			console.log(data)
+			
 			await db.updateAccount(userId, {
-				last_replied: data.id,
+				last_replied: idToReply,
 			})
-
 			return {
 				text: data.text,
 				id: data.id,
 			}
 		} catch (err) {
-			console.log(err)
+	await db.updateAccount(userId, {
+		last_replied: idToReply,
+	})
 			return {
-				data: err,
+				text: "",
+				id: ""
 			}
 		}
 	}
@@ -93,10 +82,10 @@ export class TClient {
 			return { err }
 		}
 	}
-
+	
 	async getUser(userId) {
 		try {
-			if (_.isString(userId)) {
+			if (!Number(userId)) {
 				const { data: user } = await this.client.v2.userByUsername(userId, {
 					"user.fields": [
 						"withheld",

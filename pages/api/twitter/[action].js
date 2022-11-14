@@ -1,3 +1,4 @@
+import { useId } from "react"
 import { db } from "../../../db/database"
 import { tclient } from "../../../db/TwitterApi"
 export default async function handler(req, res) {
@@ -30,7 +31,9 @@ async function replyhandler(req, res) {
 	if (req.method == "POST") {
 		try {
 			const { userId, text, tweetId } = req.body
-			const data = await tclient.reply(text, tweetId, userId)
+			const user = await db.getAccountBy("twitter_id", userId)
+			const data = await tclient.reply(text, tweetId, user.id)
+
 			return res.send(data)
 		} catch (err) {
 			res.status(400).json({

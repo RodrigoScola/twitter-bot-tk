@@ -23,14 +23,18 @@ export const fetchData = async (url, props = { method: "GET" }) => {
 class TwitterApiFrontend {
 	#baseUrl = site_url + "/api/twitter/"
 	async reply(text, tweetId, userId) {
-		await fetchData(this.#baseUrl + "reply", {
-			method: "POST",
-			body: {
-				text,
-				tweetId,
-				userId,
-			},
-		})
+		try {
+			await fetchData(this.#baseUrl + "reply", {
+				method: "POST",
+				body: {
+					text,
+					tweetId,
+					userId,
+				},
+			})
+		} catch (err) {
+			console.log(err)
+		}
 	}
 	async getUserInfo(userId) {
 		try {

@@ -69,11 +69,7 @@ class Database {
 				.from(this.#tablename)
 				.insert({ ...item })
 				.select()
-			if (item.type == "account") {
-				const { data: account } = await database
-					.from("accounts")
-					.insert({ id: item.id, name: item.content, last_tweet: item.meta.lastTweet.id })
-			}
+
 			return data
 		} catch (err) {
 			return {}
@@ -82,18 +78,25 @@ class Database {
 	async createAccount(accountId, item) {
 		const { data } = await database
 			.from("accounts")
-			.insert({ id: accountId, ...item })
+			.insert({ twitter_id: accountId, ...item })
 			.select()
 		return data
 	}
 	async getAccountBy(key, value) {
 		try {
 			const { data } = await database.from("accounts").select("*").eq(key, value)
-
+			console.log(data)
 			return data[0] !== undefined ? data[0] : {}
 		} catch (err) {
 			return {}
 		}
+	}
+	async postToAccount(postId) {
+		console.log(postId, " this is the post id")
+		const post = await this.getPost(32)
+		// console.log(post, "this is the post")
+		// const account = await this.getAccountBy("name", post.content)
+		return account
 	}
 	async getAccount(accountId) {
 		try {
@@ -116,8 +119,19 @@ class Database {
 		const post = await this.getAccount(accountId)
 		return post
 	}
+	async deleteAcccount(accountId) {
+		const { data: account } = await database.from("accounts").delete().eq("id", accountId)
+		return account
+	}
 	async deletePost(postId) {
-		const { data } = await database.from(this.#tablename).delete().eq("id", postId).select()
+		const data = await this.getPost(postId)
+		if (data.type == "account") {
+			const account = await this.getAccountBy("name", data.content)
+			console.log(account)
+			await this.deleteAcccount(account.id)
+		}
+		await database.from(this.#tablename).delete().eq("id", postId)
+
 		return data
 	}
 }

@@ -45,7 +45,7 @@ export const SearchComponent = ({ handleChange, selectResult, currentTerm = "" }
 	}
 	console.log(state.data)
 	return (
-		<div>
+		<Flex minW={"80%"}>
 			<FormInput value={currentTerm} name={"content"} handleChange={handleChange} />
 			<Box>
 				{/* descritpion
@@ -71,6 +71,6 @@ export const SearchComponent = ({ handleChange, selectResult, currentTerm = "" }
 					)
 				})}
 			</Box>
-		</div>
+		</Flex>
 	)
 }
